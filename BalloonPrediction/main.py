@@ -1,0 +1,106 @@
+'''
+Created on Jan 22, 2018
+
+@author: Zach
+'''
+
+import arcpy
+import calendar
+import datetime
+import time
+from BalloonPrediction import CUSFPredictionAPI
+
+print 'Imported ArcPy'
+
+workspace_dir = r"B:\Workspaces\Python\BalloonPrediction\output"
+launch_datetime = '2018-01-27T09:00:00-05:00'
+output_feature_class = 'prediction.shp'
+
+# longitude, latitude, elevation (meters)
+launch_locations = {
+    'Clear Spring Elementary School': [-77.934144, 39.657178, 174.1],
+    'Hagerstown Community College': [-77.672274, 39.629549, 166],
+    'Emittsburg Elementary School': [-77.329201, 39.703497, 128],
+    'Waverly Elementary School': [-77.462469, 39.427118, 120],
+    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203]}
+
+arcpy.env.workspace = workspace_dir
+arcpy.env.overwriteOutput = True
+spatial_reference = arcpy.SpatialReference(4326)
+
+
+def json_to_points(query_json, lines_feature_class, launch_location_name):
+    query_prediction = query_json['prediction']
+
+    print 'Using dataset {}'.format(query_json['request']['dataset'])
+
+    points = arcpy.Array()
+
+    # add field values and make points for each entry
+    for stage in query_prediction:
+        for entry in stage['trajectory']:
+            # convert to [-180, 180] longitude
+            entry['longitude'] = entry['longitude'] - 360
+
+            # get Unix timestamp from datetime
+            date, time = entry['datetime'].split('T')
+            year, month, day = date.split('-')
+            hours, minutes, seconds = time.strip('Z').split(':')
+            dt = datetime.datetime(
+                int(year), int(month), int(day), int(hours), int(minutes), int(seconds[0:2]))
+            unix_timestamp = calendar.timegm(dt.timetuple())
+
+            # add point to array
+            points.add(arcpy.Point(
+                X=entry['longitude'], Y=entry['latitude'], M=unix_timestamp, Z=entry['altitude']))
+
+    # create polyline of points
+    predict_path = arcpy.Polyline(points, spatial_reference)
+
+    # create insert cursor for entire row plus point geometry
+    insert_cursor = arcpy.da.InsertCursor(
+        lines_feature_class, ['SHAPE@', 'Name', 'Lnch_Time',
+                              'Dataset', 'Lnch_Lon', 'Lnch_Lat', 'Lnch_Alt_m',
+                              'Ascnt_m_s', 'Brst_Alt_m', 'Dscnt_m_s'])
+
+    # insert current predict path as row
+    insert_cursor.insertRow(
+        [predict_path, launch_location_name, query_json['request']['launch_datetime'], query_json['request']['dataset'],
+         query_json['request']['launch_longitude'], query_json['request']['launch_latitude'], query_json['request']['launch_altitude'],
+         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'], query_json['request']['descent_rate']])
+
+    # remove lock from feature class
+    del insert_cursor
+
+
+if __name__ == '__main__':
+    arcpy.management.CreateFeatureclass(workspace_dir, output_feature_class, 'POLYLINE',
+                                        has_m='ENABLED', has_z='ENABLED', spatial_reference=spatial_reference)
+
+    arcpy.management.AddField(output_feature_class,
+                              'Name', 'TEXT', 50)
+    arcpy.management.AddField(output_feature_class,
+                              'Lnch_Time', 'TEXT', 20)
+    arcpy.management.AddField(output_feature_class,
+                              'Dataset', 'TEXT', 20)
+    arcpy.management.AddField(output_feature_class,
+                              'Lnch_Lon', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Lnch_Lat', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Lnch_Alt_m', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Ascnt_m_s', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Brst_Alt_m', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Dscnt_m_s', 'DOUBLE', 10)
+
+    for name, launch_location in launch_locations.iteritems():
+        print 'Getting prediction for {}'.format(name)
+        query_json = CUSFPredictionAPI.request_prediction(
+            launch_longitude=launch_location[0], launch_latitude=launch_location[1], launch_datetime=launch_datetime)
+
+        json_to_points(query_json, output_feature_class, name)
+
+    print 'done'
