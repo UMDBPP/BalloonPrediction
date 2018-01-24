@@ -22,7 +22,8 @@ launch_locations = {
     'Hagerstown Community College': [-77.672274, 39.629549, 166],
     'Emittsburg Elementary School': [-77.329201, 39.703497, 128],
     'Waverly Elementary School': [-77.462469, 39.427118, 120],
-    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203]}
+    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203],
+    'James Buchanan Middle School': [-77.897955, 39.850029, 178]}
 
 arcpy.env.workspace = workspace_dir
 arcpy.env.overwriteOutput = True
@@ -35,6 +36,8 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
     print 'Using dataset {}'.format(query_json['request']['dataset'])
 
     points = arcpy.Array()
+
+    current_id = 0
 
     # add field values and make points for each entry
     for stage in query_prediction:
@@ -50,12 +53,17 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
                 int(year), int(month), int(day), int(hours), int(minutes), int(seconds[0:2]))
             unix_timestamp = calendar.timegm(dt.timetuple())
 
+            point_object = arcpy.Point(
+                ID=current_id, X=entry['longitude'], Y=entry['latitude'], Z=entry['altitude'], M=unix_timestamp)
+
             # add point to array
-            points.add(arcpy.Point(
-                X=entry['longitude'], Y=entry['latitude'], M=unix_timestamp, Z=entry['altitude']))
+            points.add(point_object)
+
+            current_id += 1
 
     # create polyline of points
-    predict_path = arcpy.Polyline(points, spatial_reference)
+    # TODO create polyline with Z and M values
+    predict_path = arcpy.Polyline(points)
 
     # create insert cursor for entire row plus point geometry
     insert_cursor = arcpy.da.InsertCursor(
