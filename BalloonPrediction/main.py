@@ -61,9 +61,8 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
 
             current_id += 1
 
-    # create polyline of points
-    # TODO create polyline with Z and M values
-    predict_path = arcpy.Polyline(points)
+    # create polyline of points (cannot use parameter names here)
+    predict_path = arcpy.Polyline(points, spatial_reference, True, True)
 
     # create insert cursor for entire row plus point geometry
     insert_cursor = arcpy.da.InsertCursor(
