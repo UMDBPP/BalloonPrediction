@@ -68,13 +68,13 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
     insert_cursor = arcpy.da.InsertCursor(
         lines_feature_class, ['SHAPE@', 'Name', 'Lnch_Time',
                               'Dataset', 'Lnch_Lon', 'Lnch_Lat', 'Lnch_Alt_m',
-                              'Ascnt_m_s', 'Brst_Alt_m', 'Dscnt_m_s'])
+                              'Ascnt_m_s', 'Brst_Alt_m', 'Dscnt_m_s', 'Length_m'])
 
     # insert current predict path as row
     insert_cursor.insertRow(
         [predict_path, launch_location_name, query_json['request']['launch_datetime'], query_json['request']['dataset'],
          query_json['request']['launch_longitude'], query_json['request']['launch_latitude'], query_json['request']['launch_altitude'],
-         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'], query_json['request']['descent_rate']])
+         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'], query_json['request']['descent_rate'], predict_path.getLength('GEODESIC')])
 
     # remove lock from feature class
     del insert_cursor
@@ -102,6 +102,8 @@ if __name__ == '__main__':
                               'Brst_Alt_m', 'DOUBLE', 10)
     arcpy.management.AddField(output_feature_class,
                               'Dscnt_m_s', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class,
+                              'Length_m', 'DOUBLE', 10)
 
     for name, launch_location in launch_locations.iteritems():
         print 'Getting prediction for {}'.format(name)
