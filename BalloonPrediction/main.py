@@ -13,7 +13,7 @@ from BalloonPrediction import CUSFPredictionAPI
 print 'Imported ArcPy'
 
 workspace_dir = r"B:\Workspaces\Python\BalloonPrediction\output"
-launch_datetime = '2018-01-27T09:00:00-05:00'
+launch_datetime = '2018-03-30T09:00:00-05:00'
 output_feature_class = 'prediction.shp'
 
 # longitude, latitude, elevation (meters)
@@ -73,42 +73,35 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
     # insert current predict path as row
     insert_cursor.insertRow(
         [predict_path, launch_location_name, query_json['request']['launch_datetime'], query_json['request']['dataset'],
-         query_json['request']['launch_longitude'], query_json['request']['launch_latitude'], query_json['request']['launch_altitude'],
-         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'], query_json['request']['descent_rate'], predict_path.getLength('GEODESIC')])
+         query_json['request']['launch_longitude'], query_json['request']['launch_latitude'],
+         query_json['request']['launch_altitude'],
+         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'],
+         query_json['request']['descent_rate'], predict_path.getLength('GEODESIC')])
 
     # remove lock from feature class
     del insert_cursor
 
 
 if __name__ == '__main__':
-    arcpy.management.CreateFeatureclass(workspace_dir, output_feature_class, 'POLYLINE',
-                                        has_m='ENABLED', has_z='ENABLED', spatial_reference=spatial_reference)
+    arcpy.management.CreateFeatureclass(workspace_dir, output_feature_class, 'POLYLINE', has_m='ENABLED',
+                                        has_z='ENABLED', spatial_reference=spatial_reference)
 
-    arcpy.management.AddField(output_feature_class,
-                              'Name', 'TEXT', 50)
-    arcpy.management.AddField(output_feature_class,
-                              'Lnch_Time', 'TEXT', 20)
-    arcpy.management.AddField(output_feature_class,
-                              'Dataset', 'TEXT', 20)
-    arcpy.management.AddField(output_feature_class,
-                              'Lnch_Lon', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Lnch_Lat', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Lnch_Alt_m', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Ascnt_m_s', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Brst_Alt_m', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Dscnt_m_s', 'DOUBLE', 10)
-    arcpy.management.AddField(output_feature_class,
-                              'Length_m', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Name', 'TEXT', 50)
+    arcpy.management.AddField(output_feature_class, 'Lnch_Time', 'TEXT', 20)
+    arcpy.management.AddField(output_feature_class, 'Dataset', 'TEXT', 20)
+    arcpy.management.AddField(output_feature_class, 'Lnch_Lon', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Lnch_Lat', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Lnch_Alt_m', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Ascnt_m_s', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Brst_Alt_m', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Dscnt_m_s', 'DOUBLE', 10)
+    arcpy.management.AddField(output_feature_class, 'Length_m', 'DOUBLE', 10)
 
     for name, launch_location in launch_locations.iteritems():
         print 'Getting prediction for {}'.format(name)
-        query_json = CUSFPredictionAPI.request_prediction(
-            launch_longitude=launch_location[0], launch_latitude=launch_location[1], launch_datetime=launch_datetime)
+        query_json = CUSFPredictionAPI.request_prediction(launch_longitude=launch_location[0],
+                                                          launch_latitude=launch_location[1],
+                                                          launch_datetime=launch_datetime)
 
         json_to_points(query_json, output_feature_class, name)
 
