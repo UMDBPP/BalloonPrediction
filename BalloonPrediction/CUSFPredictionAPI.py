@@ -9,7 +9,7 @@ import requests
 
 average_ascent_rate = 6.237271
 average_burst_altitude = 27399.32
-average_sea_level_descent_rate = 5.660049
+average_sea_level_descent_rate = 6.508815
 
 
 def request_prediction(launch_latitude, launch_longitude, launch_altitude=None,
