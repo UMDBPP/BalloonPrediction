@@ -13,19 +13,20 @@ from BalloonPrediction import CUSFPredictionAPI
 print 'Imported ArcPy'
 
 workspace_dir = r"B:\Workspaces\Python\BalloonPrediction\output"
-launch_datetime = '2018-03-31T09:00:00-05:00'
+launch_datetime = '2018-03-31T08:00:00-05:00'
 output_feature_class = 'prediction.shp'
 
 # longitude, latitude, elevation (meters)
 launch_locations = {
     'Clear Spring Elementary School': [-77.934144, 39.657178, 174.1],
     'Hagerstown Community College': [-77.672274, 39.629549, 166],
-    'Emittsburg Elementary School': [-77.329201, 39.703497, 128],
     'Waverly Elementary School': [-77.462469, 39.427118, 120],
-    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203],
-    'James Buchanan Middle School': [-77.897955, 39.850029, 178],
     'Hancock Elementary School': [-78.196146, 39.699886, 172],
-    'Everett Elementary School': [-78.358934, 40.004937, 314]}
+    'Emittsburg Elementary School': [-77.329201, 39.703497, 128],
+    'James Buchanan Middle School': [-77.897955, 39.850029, 178],
+    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203],
+    'Everett Elementary School': [-78.358934, 40.004937, 314]
+}
 
 arcpy.env.workspace = workspace_dir
 arcpy.env.overwriteOutput = True
