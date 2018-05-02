@@ -38,7 +38,7 @@ spatial_reference = arcpy.SpatialReference(4326)
 def json_to_points(query_json, lines_feature_class, launch_location_name, predict_id):
     query_prediction = query_json['prediction']
 
-    print 'Using dataset {}'.format(query_json['request']['dataset'])
+    print 'Using dataset {}'.format(query_json['request']['dataset'].replace('-', '').replace(':', '')[0:13])
 
     points = arcpy.Array()
 
