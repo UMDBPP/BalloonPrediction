@@ -7,8 +7,8 @@ Created on Jan 17, 2018
 import datetime
 import requests
 
-average_ascent_rate = 6.370311
-average_burst_altitude = 27205.52
+average_ascent_rate = 6.438535
+average_burst_altitude = 27366.13
 average_sea_level_descent_rate = 6.387933
 
 

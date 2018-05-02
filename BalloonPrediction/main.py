@@ -14,7 +14,7 @@ from BalloonPrediction import CUSFPredictionAPI
 print 'Imported ArcPy'
 
 workspace_dir = r"B:\Workspaces\Python\BalloonPrediction\output"
-launch_datetime = '2018-03-31T08:00:00-05:00'
+launch_datetime = '2018-05-05T08:30:00-05:00'
 output_feature_class = 'prediction.shp'
 
 # longitude, latitude, elevation (meters)
