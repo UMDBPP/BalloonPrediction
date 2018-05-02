@@ -3,11 +3,12 @@ Created on Jan 22, 2018
 
 @author: Zach
 """
-
-import arcpy
 import calendar
 import datetime
-import time
+from collections import OrderedDict
+
+import arcpy
+
 from BalloonPrediction import CUSFPredictionAPI
 
 print 'Imported ArcPy'
@@ -17,23 +18,24 @@ launch_datetime = '2018-03-31T08:00:00-05:00'
 output_feature_class = 'prediction.shp'
 
 # longitude, latitude, elevation (meters)
-launch_locations = {
-    'Clear Spring Elementary School': [-77.934144, 39.657178, 174.1],
-    'Hagerstown Community College': [-77.672274, 39.629549, 166],
-    'Waverly Elementary School': [-77.462469, 39.427118, 120],
-    'Hancock Elementary School': [-78.196146, 39.699886, 172],
-    'Emittsburg Elementary School': [-77.329201, 39.703497, 128],
-    'James Buchanan Middle School': [-77.897955, 39.850029, 178],
-    'Benjamin Chambers Elementary School': [-77.667712, 39.944190, 203],
-    'Everett Elementary School': [-78.358934, 40.004937, 314]
-}
+launch_locations = OrderedDict([
+    ('Clear Spring Elementary School', [-77.934144, 39.657178, 174.1]),
+    ('Hagerstown Community College', [-77.672274, 39.629549, 166]),
+    ('Valley Elementary School', [-77.547824, 39.359031, 161]),
+    ('Waverly Elementary School', [-77.462469, 39.427118, 120]),
+    ('Hancock Elementary School', [-78.196146, 39.699886, 172]),
+    ('Emittsburg Elementary School', [-77.329201, 39.703497, 128]),
+    ('James Buchanan Middle School', [-77.897955, 39.850029, 178]),
+    ('Benjamin Chambers Elementary School', [-77.667712, 39.944190, 203]),
+    ('Everett Elementary School', [-78.358934, 40.004937, 314])
+])
 
 arcpy.env.workspace = workspace_dir
 arcpy.env.overwriteOutput = True
 spatial_reference = arcpy.SpatialReference(4326)
 
 
-def json_to_points(query_json, lines_feature_class, launch_location_name):
+def json_to_points(query_json, lines_feature_class, launch_location_name, predict_id):
     query_prediction = query_json['prediction']
 
     print 'Using dataset {}'.format(query_json['request']['dataset'])
@@ -69,17 +71,19 @@ def json_to_points(query_json, lines_feature_class, launch_location_name):
 
     # create insert cursor for entire row plus point geometry
     insert_cursor = arcpy.da.InsertCursor(
-        lines_feature_class, ['SHAPE@', 'Name', 'Lnch_Time',
+        lines_feature_class, ['Id', 'SHAPE@', 'Name', 'Lnch_Time',
                               'Dataset', 'Lnch_Lon', 'Lnch_Lat', 'Lnch_Alt_m',
                               'Ascnt_m_s', 'Brst_Alt_m', 'Dscnt_m_s', 'Length_m'])
 
     # insert current predict path as row
-    insert_cursor.insertRow(
-        [predict_path, launch_location_name, query_json['request']['launch_datetime'], query_json['request']['dataset'],
-         query_json['request']['launch_longitude'], query_json['request']['launch_latitude'],
-         query_json['request']['launch_altitude'],
-         query_json['request']['ascent_rate'], query_json['request']['burst_altitude'],
-         query_json['request']['descent_rate'], predict_path.getLength('GEODESIC')])
+    insert_cursor.insertRow([
+        predict_id,
+        predict_path, launch_location_name, query_json['request']['launch_datetime'], query_json['request']['dataset'],
+        query_json['request']['launch_longitude'], query_json['request']['launch_latitude'],
+        query_json['request']['launch_altitude'],
+        query_json['request']['ascent_rate'], query_json['request']['burst_altitude'],
+        query_json['request']['descent_rate'], predict_path.getLength('GEODESIC')
+    ])
 
     # remove lock from feature class
     del insert_cursor
@@ -100,12 +104,19 @@ if __name__ == '__main__':
     arcpy.management.AddField(output_feature_class, 'Dscnt_m_s', 'DOUBLE', 10)
     arcpy.management.AddField(output_feature_class, 'Length_m', 'DOUBLE', 10)
 
+    # set predict Id
+    current_predict_id = 1
+
     for name, launch_location in launch_locations.iteritems():
         print 'Getting prediction for {}'.format(name)
         query_json = CUSFPredictionAPI.request_prediction(launch_longitude=launch_location[0],
                                                           launch_latitude=launch_location[1],
                                                           launch_datetime=launch_datetime)
 
-        json_to_points(query_json, output_feature_class, name)
+        json_to_points(query_json, output_feature_class, name, current_predict_id)
+
+        current_predict_id += 1
+
+    #arcpy.management.Sort(output_feature_class, output_feature_class, 'Id')
 
     print 'done'
