@@ -5,11 +5,12 @@ Created on Jan 17, 2018
 '''
 
 import datetime
+
 import requests
 
-average_ascent_rate = 6.438535
-average_burst_altitude = 27366.13
-average_sea_level_descent_rate = 6.387933
+average_ascent_rate = 6.148983
+average_burst_altitude = 26047.734976
+average_sea_level_descent_rate = 6.040434
 
 
 def request_prediction(launch_latitude, launch_longitude, launch_altitude=None,
