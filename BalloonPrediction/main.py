@@ -6,11 +6,6 @@ Created on Jan 22, 2018
 
 from collections import OrderedDict
 
-import os
-
-for var in os.environ:
-    print("{}: {}".format(var, os.environ[var]))
-
 # from BalloonPrediction import Processing_ArcPy
 from BalloonPrediction import Processing_PyQGIS
 
