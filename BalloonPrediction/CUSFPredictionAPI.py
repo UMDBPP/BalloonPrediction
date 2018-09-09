@@ -14,21 +14,19 @@ average_sea_level_descent_rate = 6.040434
 
 
 def request_prediction(launch_latitude, launch_longitude, launch_altitude=None,
-                       launch_datetime='{:%Y-%m-%dT%H:%M:%SZ}'.format(datetime.datetime.now()),
+                       launch_datetime=f'{datetime.datetime.now():%Y-%m-%dT%H:%M:%SZ}',
                        ascent_rate=average_ascent_rate, burst_altitude=average_burst_altitude,
                        sea_level_descent_rate=average_sea_level_descent_rate):
     if launch_altitude == None:
         launch_altitude_query = ''
     else:
-        launch_altitude_query = 'launch_altitude={:f}&'.format(launch_altitude)
+        launch_altitude_query = f'launch_altitude={launch_altitude:f}&'
 
     # convert to 0 - 360 longitude
     if launch_longitude < 0:
         launch_longitude = launch_longitude + 360
 
-    query_request = 'http://predict.cusf.co.uk/api/v1/?launch_latitude={:f}&launch_longitude={:f}&{:s}launch_datetime={:s}&ascent_rate={:f}&burst_altitude={:f}&descent_rate={:f}'.format(
-        launch_latitude, launch_longitude, launch_altitude_query, launch_datetime, ascent_rate, burst_altitude,
-        sea_level_descent_rate)
+    query_request = f'http://predict.cusf.co.uk/api/v1/?launch_latitude={launch_latitude:f}&launch_longitude={launch_longitude:f}&{launch_altitude_query:s}launch_datetime={launch_datetime:s}&ascent_rate={ascent_rate:f}&burst_altitude={burst_altitude:f}&descent_rate={sea_level_descent_rate:f}'
 
     query_result = requests.get(query_request)
 

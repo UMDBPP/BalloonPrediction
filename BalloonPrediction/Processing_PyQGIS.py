@@ -8,8 +8,7 @@ import calendar
 import datetime
 
 from PyQt5.QtCore import QVariant
-from qgis import QgsGeometry
-from qgis.core import QgsPoint, QgsVectorLayer, QgsCoordinateReferenceSystem, QgsField, QgsFeature
+from qgis.core import QgsGeometry, QgsPoint, QgsVectorLayer, QgsCoordinateReferenceSystem, QgsField, QgsFeature
 
 from BalloonPrediction import CUSFPredictionAPI
 
@@ -20,7 +19,7 @@ spatial_reference.createFromSrsId(3452)  # EPSG:4326
 def json_to_polylines(query_json, lines_feature_class, launch_location_name, predict_id):
     query_prediction = query_json['prediction']
 
-    print('Using dataset {}'.format(query_json['request']['dataset'].replace('-', '').replace(':', '')[0:13]))
+    print(f'Using dataset {query_json["request"]["dataset"].replace("-", "").replace(":", "")[0:13]}')
 
     points = []
 
@@ -92,7 +91,7 @@ def create_polylines(workspace_dir, launch_datetime, output_feature_class, launc
 
     # populate fields for each launch location predict
     for name, launch_location in launch_locations.items():
-        print('Getting prediction for {}'.format(name))
+        print(f'Getting prediction for {name}')
         query_json = CUSFPredictionAPI.request_prediction(launch_longitude=launch_location[0],
                                                           launch_latitude=launch_location[1],
                                                           launch_datetime=launch_datetime)

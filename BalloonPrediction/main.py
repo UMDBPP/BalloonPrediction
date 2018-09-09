@@ -8,12 +8,13 @@ from collections import OrderedDict
 
 # from BalloonPrediction import Processing_ArcPy
 from BalloonPrediction import Processing_PyQGIS
+# from BalloonPrediction import Processing_WKT
 
 workspace_dir = r"B:\Workspaces\Python\BalloonPrediction\output"
-launch_date = '2018-05-22'
+launch_date = '2018-06-30'
 launch_time = '08:30:00'
 launch_timezone = '-05:00'
-output_feature_class = 'prediction.shp'
+output_filename = 'prediction.shp'
 
 # longitude, latitude, elevation (meters)
 launch_locations = OrderedDict([
@@ -25,13 +26,16 @@ launch_locations = OrderedDict([
     ('Emittsburg Elementary School', [-77.329201, 39.703497, 128]),
     ('James Buchanan Middle School', [-77.897955, 39.850029, 178]),
     ('Benjamin Chambers Elementary School', [-77.667712, 39.944190, 203]),
-    ('Everett Elementary School', [-78.358934, 40.004937, 314])
+    ('Everett Elementary School', [-78.358934, 40.004937, 314]),
+    ('Westminster Elementary School', [-77.025882, 39.579275, 213]),
+
 ])
 
 if __name__ == '__main__':
-    launch_datetime = '{}T{}{}'.format(launch_date, launch_time, launch_timezone)
+    launch_datetime = f'{launch_date}T{launch_time}{launch_timezone}'
 
-    # Processing_ArcPy.create_polylines(workspace_dir, launch_datetime, output_feature_class, launch_locations)
-    Processing_PyQGIS.create_polylines(workspace_dir, launch_datetime, output_feature_class, launch_locations)
+    # Processing_ArcPy.create_polylines(workspace_dir, launch_datetime, output_filename, launch_locations)
+    Processing_PyQGIS.create_polylines(workspace_dir, launch_datetime, output_filename, launch_locations)
+    # Processing_WKT.write_polylines_csv(output_filename, launch_datetime, launch_locations)
 
     print('done')
