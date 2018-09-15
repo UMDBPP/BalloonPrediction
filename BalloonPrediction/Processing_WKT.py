@@ -4,12 +4,10 @@ Created on May 21, 2018
 @author: Zach
 """
 
-import calendar
-import datetime
-
 from BalloonPrediction import CUSFPredictionAPI
 
-def json_to_csv_line(query_json, output_feature_class, launch_location_name, predict_id):
+
+def json_to_csv_line(query_json, launch_location_name, predict_id):
     query_prediction = query_json['prediction']
 
     print(f'Using dataset {query_json["request"]["dataset"].replace("-", "").replace(":", "")[0:13]}')
@@ -43,7 +41,9 @@ def json_to_csv_line(query_json, output_feature_class, launch_location_name, pre
     return csv_line
 
 
-columns = ['Name', 'geom', 'Launch_Time', 'Dataset', 'Launch_Longitude', 'Launch_Latitude', 'Launch_Altitude_m', 'Ascent_Rate_m_s', 'Burst_Altitude_m', 'Descent_Rate_m_s']
+columns = ['Name', 'geom', 'Launch_Time', 'Dataset', 'Launch_Longitude', 'Launch_Latitude', 'Launch_Altitude_m',
+           'Ascent_Rate_m_s', 'Burst_Altitude_m', 'Descent_Rate_m_s']
+
 
 def write_polylines_csv(output_filename, launch_datetime, launch_locations):
     with open(output_filename, 'w') as output_text_file:
@@ -59,5 +59,4 @@ def write_polylines_csv(output_filename, launch_datetime, launch_locations):
                                                               launch_latitude=launch_location[1],
                                                               launch_datetime=launch_datetime)
 
-            output_text_file.write(json_to_csv_line(query_json, output_filename, name, current_predict_id))
-
+            output_text_file.write(json_to_csv_line(query_json, name, current_predict_id))

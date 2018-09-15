@@ -8,12 +8,17 @@ import calendar
 import datetime
 
 from PyQt5.QtCore import QVariant
-from qgis.core import QgsGeometry, QgsPoint, QgsVectorLayer, QgsCoordinateReferenceSystem, QgsField, QgsFeature
+from qgis.core import QgsApplication, QgsGeometry, QgsPoint, QgsVectorLayer, QgsCoordinateReferenceSystem, QgsField, \
+    QgsFeature
 
 from BalloonPrediction import CUSFPredictionAPI
 
 spatial_reference = QgsCoordinateReferenceSystem()
 spatial_reference.createFromSrsId(3452)  # EPSG:4326
+
+qgs = QgsApplication([], False)
+qgs.setPrefixPath(r"A:\OSGeo4W64\apps\qgis", True)
+qgs.initQgis()
 
 
 def json_to_polylines(query_json, lines_feature_class, launch_location_name, predict_id):
@@ -66,9 +71,9 @@ def json_to_polylines(query_json, lines_feature_class, launch_location_name, pre
     return feature
 
 
-def create_polylines(workspace_dir, launch_datetime, output_feature_class, launch_locations):
+def create_polylines(output_filename, launch_datetime, launch_locations):
     # create output feature class
-    lines_layer = QgsVectorLayer(output_feature_class)
+    lines_layer = QgsVectorLayer(output_filename)
 
     lines_layer.startEditing()
 
@@ -84,6 +89,8 @@ def create_polylines(workspace_dir, launch_datetime, output_feature_class, launc
     lines_layer.addAttribute(QgsField("Dscnt_m_s", QVariant.Double))
     lines_layer.addAttribute(QgsField("Length_m", QVariant.Double))
 
+    lines_layer.commitChanges()
+
     features = []
 
     # set predict Id
@@ -96,12 +103,14 @@ def create_polylines(workspace_dir, launch_datetime, output_feature_class, launc
                                                           launch_latitude=launch_location[1],
                                                           launch_datetime=launch_datetime)
 
-        features.append(json_to_polylines(query_json, output_feature_class, name, current_predict_id))
+        features.append(json_to_polylines(query_json, output_filename, name, current_predict_id))
 
         current_predict_id += 1
 
+    lines_layer.startEditing()
+
     # insert polylines into layer
-    lines_layer.addFeatures(features)
+    lines_layer.dataProvider().addFeatures(features)
 
     # insert polyline
     lines_layer.commitChanges()

@@ -71,7 +71,7 @@ def json_to_polylines(query_json, lines_feature_class, launch_location_name, pre
     del insert_cursor
 
 
-def create_polylines(workspace_dir, launch_datetime, output_feature_class, launch_locations):
+def create_polylines(workspace_dir, output_feature_class, launch_datetime, launch_locations):
     arcpy.env.workspace = workspace_dir
 
     # create output feature class

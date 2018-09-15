@@ -37,5 +37,5 @@ def request_prediction(launch_latitude, launch_longitude, launch_altitude=None,
         return (query_json)
     else:
         # raise exception if error found
-        raise (Exception('{} {}: {}'.format(query_result.status_code, query_json['error']['type'],
-                                            query_json['error']['description'])))
+        raise (Exception(
+            f'{query_result.status_code} {query_json["error"]["type"]}: {query_json["error"]["description"]))}'))
